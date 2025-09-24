@@ -1,0 +1,26 @@
+{
+  "name": "mycoach-proto",
+  "version": "1.0.0",
+  "description": "MyCoach - Personal Learning Assistant with enhanced login animations",
+  "main": "index.html",
+  "scripts": {
+    "start": "serve -s . -p 3000",
+    "build": "echo 'No build step required for static site' && exit 0",
+    "dev": "serve -s . -p 8000"
+  },
+  "keywords": [
+    "education",
+    "learning",
+    "exam-prep",
+    "mycoach",
+    "static-site"
+  ],
+  "author": "Venka",
+  "license": "MIT",
+  "devDependencies": {
+    "serve": "^14.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
