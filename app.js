@@ -157,6 +157,21 @@ function LoginForm({ loginMethod, onLogin, onBack, onSendOTP }) {
   const [mobile, setMobile] = React.useState('');
   const [showPassword, setShowPassword] = React.useState(false);
   const [useOTP, setUseOTP] = React.useState(false);
+  const [currentQuote, setCurrentQuote] = React.useState(null);
+
+  // Load a motivational quote for login
+  React.useEffect(() => {
+    if (window.getRandomQuote) {
+      const quote = window.getRandomQuote();
+      setCurrentQuote(quote);
+    } else {
+      // Fallback quote
+      setCurrentQuote({ 
+        text: "The journey of a thousand miles begins with one step.",
+        author: "Lao Tzu"
+      });
+    }
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -185,6 +200,21 @@ function LoginForm({ loginMethod, onLogin, onBack, onSendOTP }) {
         <div className="icon-arrow-left"></div>
         <span>Back</span>
       </button>
+
+      {/* Motivational Quote */}
+      {currentQuote && (
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-500 p-4 rounded-lg">
+          <div className="flex items-start space-x-3">
+            <i data-lucide="quote" className="w-5 h-5 text-blue-500 mt-1 flex-shrink-0"></i>
+            <div>
+              <p className="text-sm italic text-gray-700 leading-relaxed">{currentQuote.text}</p>
+              {currentQuote.author && (
+                <p className="text-xs text-gray-500 mt-2">— {currentQuote.author}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Email/Mobile Input */}
       <div className="relative group">
