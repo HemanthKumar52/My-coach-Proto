@@ -23,6 +23,41 @@
             --background: #ffffff;
             --surface: #f9fafb;
         }
+        
+        /* Dark mode variables */
+        .dark {
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --background: #1f2937;
+            --surface: #374151;
+        }
+    }
+
+    @layer components {
+        .nav-item {
+            @apply flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200 cursor-pointer;
+        }
+
+        .nav-item:hover {
+            @apply bg-[var(--secondary-color)] text-[var(--primary-color)];
+        }
+
+        .nav-item.active {
+            @apply bg-[var(--primary-color)] text-white;
+        }
+
+        .card {
+            @apply bg-white rounded-xl shadow-lg border border-gray-100 p-6;
+        }
+
+        /* Dark mode styles */
+        .dark .card {
+            @apply bg-gray-800 border-gray-700;
+        }
+
+        .dark body {
+            @apply bg-gray-900 text-gray-100;
+        }
     }
     </style>
 </head>
