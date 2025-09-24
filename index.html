@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyCoach - Your Personal Learning Assistant</title>
+    <meta name="description" content="MyCoach is your personalized learning platform for exam preparation and academic excellence">
+    <meta name="keywords" content="education, learning, exam prep, tutoring, NAPLAN, ICAS, VIC scholarship">
+    <meta property="og:title" content="MyCoach - Your Personal Learning Assistant">
+    <meta property="og:description" content="Personalized learning platform for exam preparation and academic excellence">
+    <meta name="twitter:title" content="MyCoach - Your Personal Learning Assistant">
+    <meta name="twitter:description" content="Personalized learning platform for exam preparation and academic excellence">
+
+    <script src="https://resource.trickle.so/vendor_lib/unpkg/react@18/umd/react.production.min.js"></script>
+    <script src="https://resource.trickle.so/vendor_lib/unpkg/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://resource.trickle.so/vendor_lib/unpkg/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://resource.trickle.so/vendor_lib/unpkg/lucide-static@0.516.0/font/lucide.css" rel="stylesheet">
+
+    <style type="text/tailwindcss">
+    @layer theme {
+        :root {
+            --primary-color: #dc2626;
+            --secondary-color: #fef2f2;
+            --accent-color: #7f1d1d;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --background: #ffffff;
+            --surface: #f9fafb;
+        }
+    }
+
+    @layer base {
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+        }
+    }
+
+    @layer components {
+        .btn-primary {
+            @apply bg-[var(--primary-color)] text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 hover:bg-[var(--accent-color)] focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] focus:ring-offset-2;
+        }
+        
+        .btn-secondary {
+            @apply border-2 border-[var(--primary-color)] text-[var(--primary-color)] px-6 py-3 rounded-lg font-semibold transition-all duration-200 hover:bg-[var(--primary-color)] hover:text-white focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] focus:ring-offset-2;
+        }
+
+        .card {
+            @apply bg-white rounded-xl shadow-lg border border-gray-100 p-6 transition-all duration-300 hover:shadow-xl hover:scale-105;
+        }
+
+        .nav-item {
+            @apply flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200 cursor-pointer;
+        }
+
+        .nav-item:hover {
+            @apply bg-[var(--secondary-color)] text-[var(--primary-color)];
+        }
+
+        .nav-item.active {
+            @apply bg-[var(--primary-color)] text-white;
+        }
+
+        /* Water Droplet Effect Animation */
+        @keyframes ripple {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        .ripple-effect {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ripple-effect::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .ripple-effect:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        /* Gradient Text Animation */
+        @keyframes gradient-shift {
+            0%, 100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .gradient-text {
+            background: linear-gradient(-45deg, #ef4444, #dc2626, #b91c1c, #991b1b);
+            background-size: 400% 400%;
+            animation: gradient-shift 3s ease infinite;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Floating Animation */
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+    }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel" src="components/Loading.js"></script>
+    <script type="text/babel" src="components/Quote.js"></script>
+    <script type="text/babel" src="utils/quotes.js"></script>
+    <script type="text/babel" src="app.js"></script>
+</body>
+</html>

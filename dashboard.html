@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - MyCoach</title>
+    <meta name="description" content="Your personalized learning dashboard">
+    
+    <script src="https://resource.trickle.so/vendor_lib/unpkg/react@18/umd/react.production.min.js"></script>
+    <script src="https://resource.trickle.so/vendor_lib/unpkg/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://resource.trickle.so/vendor_lib/unpkg/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://resource.trickle.so/vendor_lib/unpkg/lucide-static@0.516.0/font/lucide.css" rel="stylesheet">
+
+    <style type="text/tailwindcss">
+    @layer theme {
+        :root {
+            --primary-color: #dc2626;
+            --secondary-color: #fef2f2;
+            --accent-color: #7f1d1d;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --background: #ffffff;
+            --surface: #f9fafb;
+        }
+    }
+
+    @layer components {
+        .nav-item {
+            @apply flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200 cursor-pointer;
+        }
+
+        .nav-item:hover {
+            @apply bg-[var(--secondary-color)] text-[var(--primary-color)];
+        }
+
+        .nav-item.active {
+            @apply bg-[var(--primary-color)] text-white;
+        }
+
+        .card {
+            @apply bg-white rounded-xl shadow-lg border border-gray-100 p-6;
+        }
+    }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel" src="components/Sidebar.js"></script>
+    <script type="text/babel" src="components/HomePage.js"></script>
+    <script type="text/babel" src="dashboard-app.js"></script>
+</body>
+</html>
