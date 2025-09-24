@@ -1,14 +1,19 @@
 const philosophyQuotes = [
-  "The only true wisdom is in knowing you know nothing. - Socrates",
-  "Education is the most powerful weapon which you can use to change the world. - Nelson Mandela",
-  "The mind is not a vessel to be filled, but a fire to be kindled. - Plutarch",
-  "Learning never exhausts the mind. - Leonardo da Vinci",
-  "The beautiful thing about learning is that no one can take it away from you. - B.B. King",
-  "Education is not preparation for life; education is life itself. - John Dewey",
-  "The capacity to learn is a gift; the ability to learn is a skill; the willingness to learn is a choice. - Brian Herbert",
-  "Live as if you were to die tomorrow. Learn as if you were to live forever. - Mahatma Gandhi",
-  "The expert in anything was once a beginner. - Helen Hayes",
-  "Success is the sum of small efforts repeated day in and day out. - Robert Collier"
+  "Success is not final, failure is not fatal: it is the courage to continue that counts. - Winston Churchill",
+  "Your limitation—it's only your imagination. - Unknown",
+  "Great things never come from comfort zones. - Neil Strauss",
+  "Dream it. Wish it. Do it. - Unknown",
+  "Success doesn't just find you. You have to go out and get it. - Unknown",
+  "The harder you work for something, the greater you'll feel when you achieve it. - Unknown",
+  "Dream bigger. Do bigger. - Unknown",
+  "Don't stop when you're tired. Stop when you're done. - Unknown",
+  "Wake up with determination. Go to bed with satisfaction. - Unknown",
+  "Do something today that your future self will thank you for. - Sean Patrick Flanery",
+  "Little things make big days. - Unknown",
+  "It's going to be hard, but hard does not mean impossible. - Unknown",
+  "Don't wait for opportunity. Create it. - Unknown",
+  "Sometimes we're tested not to show our weaknesses, but to discover our strengths. - Unknown",
+  "The key to success is to focus on goals, not obstacles. - Unknown"
 ];
 
 function getRandomQuote() {

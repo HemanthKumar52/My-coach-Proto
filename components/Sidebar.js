@@ -1,12 +1,12 @@
 function Sidebar({ currentPage, onPageChange }) {
+  const [showProfileMenu, setShowProfileMenu] = React.useState(false);
+  
   const menuItems = [
     { id: 'home', label: 'Home', icon: 'home' },
     { id: 'about', label: 'About Us', icon: 'info' },
     { id: 'careers', label: 'Careers', icon: 'briefcase' },
-    { id: 'app-details', label: 'Profile Info', icon: 'smartphone' },
     { id: 'exam-prep', label: 'Exam Prep', icon: 'book-open' },
     { id: 'tutors', label: 'Tutors', icon: 'users' },
-    { id: 'profile', label: 'Profile Details', icon: 'user' },
     { id: 'reports', label: 'Reports', icon: 'chart-bar' }
   ];
 
@@ -48,17 +48,58 @@ function Sidebar({ currentPage, onPageChange }) {
 
         {/* User Profile */}
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 bg-white">
-          <div className="flex items-center space-x-3 p-3 rounded-lg transition-all duration-300 hover:bg-gray-50 cursor-pointer">
-            <div className="w-8 h-8 bg-gradient-to-r from-[var(--primary-color)] to-blue-600 rounded-full flex items-center justify-center transition-transform duration-300 hover:scale-110">
-              <div className="icon-user text-sm text-white"></div>
+          <div className="relative">
+            <div 
+              className="flex items-center space-x-3 p-3 rounded-lg transition-all duration-300 hover:bg-gray-50 cursor-pointer"
+              onClick={() => setShowProfileMenu(!showProfileMenu)}
+            >
+              <div className="w-8 h-8 bg-gradient-to-r from-[var(--primary-color)] to-blue-600 rounded-full flex items-center justify-center transition-transform duration-300 hover:scale-110">
+                <div className="icon-user text-sm text-white"></div>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-[var(--text-primary)] transition-colors duration-300">Student</p>
+                <p className="text-xs text-[var(--text-secondary)] transition-colors duration-300">Level 1</p>
+              </div>
+              <button className="p-2 hover:bg-gray-100 rounded-full transition-all duration-300 hover:scale-110 hover:shadow-md">
+                <div className={`icon-chevron-${showProfileMenu ? 'up' : 'down'} text-sm text-[var(--text-secondary)] hover:text-[var(--primary-color)] transition-colors duration-300`}></div>
+              </button>
             </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-[var(--text-primary)] transition-colors duration-300">Student</p>
-              <p className="text-xs text-[var(--text-secondary)] transition-colors duration-300">Level 1</p>
-            </div>
-            <button className="p-2 hover:bg-gray-100 rounded-full transition-all duration-300 hover:scale-110 hover:shadow-md">
-              <div className="icon-settings text-sm text-[var(--text-secondary)] hover:text-[var(--primary-color)] transition-colors duration-300"></div>
-            </button>
+
+            {/* Profile Menu */}
+            {showProfileMenu && (
+              <div className="absolute bottom-full left-0 right-0 mb-2 bg-white rounded-lg shadow-xl border border-gray-200 py-2">
+                <button
+                  onClick={() => {
+                    onPageChange('app-details');
+                    setShowProfileMenu(false);
+                  }}
+                  className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors duration-300 flex items-center space-x-3"
+                >
+                  <div className="icon-smartphone text-sm text-[var(--primary-color)]"></div>
+                  <span className="text-sm font-medium">Profile Info</span>
+                </button>
+                <button
+                  onClick={() => {
+                    onPageChange('profile');
+                    setShowProfileMenu(false);
+                  }}
+                  className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors duration-300 flex items-center space-x-3"
+                >
+                  <div className="icon-user text-sm text-[var(--primary-color)]"></div>
+                  <span className="text-sm font-medium">Profile Details</span>
+                </button>
+                <div className="border-t border-gray-100 mt-2 pt-2">
+                  <button className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors duration-300 flex items-center space-x-3">
+                    <div className="icon-settings text-sm text-[var(--text-secondary)]"></div>
+                    <span className="text-sm font-medium text-[var(--text-secondary)]">Settings</span>
+                  </button>
+                  <button className="w-full text-left px-4 py-3 hover:bg-red-50 transition-colors duration-300 flex items-center space-x-3">
+                    <div className="icon-log-out text-sm text-red-500"></div>
+                    <span className="text-sm font-medium text-red-500">Logout</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </aside>

@@ -34,19 +34,143 @@ class ErrorBoundary extends React.Component {
   }
 }
 
+// OTP Verification Component
+function OTPVerification({ loginMethod, contact, onVerify, onBack }) {
+  const [otp, setOtp] = React.useState(['', '', '', '', '', '']);
+  const [resendTimer, setResendTimer] = React.useState(30);
+  const [canResend, setCanResend] = React.useState(false);
+
+  React.useEffect(() => {
+    if (resendTimer > 0) {
+      const timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
+      return () => clearTimeout(timer);
+    } else {
+      setCanResend(true);
+    }
+  }, [resendTimer]);
+
+  const handleOtpChange = (index, value) => {
+    if (value.length <= 1) {
+      const newOtp = [...otp];
+      newOtp[index] = value;
+      setOtp(newOtp);
+      
+      // Auto-focus next input
+      if (value && index < 5) {
+        const nextInput = document.getElementById(`otp-${index + 1}`);
+        if (nextInput) nextInput.focus();
+      }
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const otpCode = otp.join('');
+    if (otpCode.length === 6) {
+      onVerify(otpCode);
+    }
+  };
+
+  const handleResend = () => {
+    setResendTimer(30);
+    setCanResend(false);
+    // Simulate resending OTP
+    console.log('Resending OTP to:', contact);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <button 
+        type="button"
+        onClick={onBack}
+        className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors duration-300"
+      >
+        <div className="icon-arrow-left"></div>
+        <span>Back</span>
+      </button>
+
+      <div className="text-center">
+        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="icon-smartphone text-2xl text-green-600"></div>
+        </div>
+        <h3 className="text-xl font-bold text-gray-800 mb-2">Verify OTP</h3>
+        <p className="text-gray-600">
+          We've sent a 6-digit code to your {loginMethod === 'email' ? 'email' : 'mobile number'}
+        </p>
+        <p className="text-sm text-gray-500 mt-1">
+          {loginMethod === 'email' ? contact : `***-***-${contact.slice(-4)}`}
+        </p>
+      </div>
+
+      {/* OTP Input */}
+      <div className="flex justify-center space-x-3">
+        {otp.map((digit, index) => (
+          <input
+            key={index}
+            id={`otp-${index}`}
+            type="text"
+            value={digit}
+            onChange={(e) => handleOtpChange(index, e.target.value)}
+            className="w-12 h-12 text-center text-xl font-bold border-2 border-gray-200 rounded-lg focus:border-red-500 focus:outline-none transition-colors duration-300"
+            maxLength={1}
+          />
+        ))}
+      </div>
+
+      {/* Submit Button */}
+      <button
+        type="submit"
+        disabled={otp.join('').length !== 6}
+        className="w-full group relative overflow-hidden bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl py-4 px-6 font-semibold transition-all duration-500 hover:from-green-600 hover:to-green-700 hover:shadow-lg transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full animate-ping"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full opacity-30 animate-pulse"></div>
+        </div>
+        <span className="relative z-10">Verify OTP</span>
+      </button>
+
+      {/* Resend OTP */}
+      <div className="text-center">
+        {canResend ? (
+          <button
+            type="button"
+            onClick={handleResend}
+            className="text-red-500 hover:text-red-600 font-medium transition-colors duration-300 hover:underline"
+          >
+            Resend OTP
+          </button>
+        ) : (
+          <p className="text-gray-500">
+            Resend OTP in <span className="font-medium text-red-500">{resendTimer}s</span>
+          </p>
+        )}
+      </div>
+    </form>
+  );
+}
+
 // LoginForm Component with Animated Graphics
-function LoginForm({ loginMethod, onLogin, onBack }) {
+function LoginForm({ loginMethod, onLogin, onBack, onSendOTP }) {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [mobile, setMobile] = React.useState('');
   const [showPassword, setShowPassword] = React.useState(false);
+  const [useOTP, setUseOTP] = React.useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (loginMethod === 'email') {
-      onLogin(email, password);
+    if (useOTP) {
+      // Send OTP instead of direct login
+      const contact = loginMethod === 'email' ? email : mobile;
+      onSendOTP(loginMethod, contact);
     } else {
-      onLogin(mobile, password);
+      // Traditional password login
+      if (loginMethod === 'email') {
+        onLogin(email, password);
+      } else {
+        onLogin(mobile, password);
+      }
     }
   };
 
@@ -102,56 +226,104 @@ function LoginForm({ loginMethod, onLogin, onBack }) {
         </div>
       </div>
 
-      {/* Password Input */}
-      <div className="relative group">
-        <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
-        <div className="relative">
-          <input
-            type={showPassword ? 'text' : 'password'}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-3 pl-12 pr-12 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:outline-none transition-all duration-300 bg-white hover:border-gray-300"
-            placeholder="Enter your password"
-            required
-          />
-          <div className={`absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 transition-colors duration-300 group-hover:text-red-500 ${password ? 'text-red-500' : ''}`}>
-            <div className="icon-lock text-lg"></div>
-          </div>
-          
-          {/* Show/Hide Password Button */}
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-300"
-          >
-            <div className={`icon-${showPassword ? 'eye-off' : 'eye'} text-lg`}></div>
-          </button>
+      {/* Login Method Toggle */}
+      <div className="flex items-center justify-center space-x-4 py-4">
+        <button
+          type="button"
+          onClick={() => setUseOTP(false)}
+          className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
+            !useOTP 
+              ? 'bg-red-500 text-white shadow-md' 
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+          }`}
+        >
+          Password Login
+        </button>
+        <button
+          type="button"
+          onClick={() => setUseOTP(true)}
+          className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
+            useOTP 
+              ? 'bg-green-500 text-white shadow-md' 
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+          }`}
+        >
+          OTP Login
+        </button>
+      </div>
 
-          {/* Animated Security Graphic */}
-          <div className="absolute -right-8 top-1/2 transform -translate-y-1/2">
-            <div className="w-8 h-8 relative">
-              <div className={`absolute inset-0 transition-all duration-500 ${password ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}`}>
-                <div className="w-full h-full bg-gradient-to-r from-purple-400 to-purple-500 rounded-full animate-pulse"></div>
-                <div className="absolute inset-2 bg-white rounded-full flex items-center justify-center">
-                  <div className="icon-shield text-xs text-purple-500"></div>
+      {!useOTP && (
+        <>
+          {/* Password Input */}
+          <div className="relative group">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-3 pl-12 pr-12 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:outline-none transition-all duration-300 bg-white hover:border-gray-300"
+                placeholder="Enter your password"
+                required
+              />
+              <div className={`absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 transition-colors duration-300 group-hover:text-red-500 ${password ? 'text-red-500' : ''}`}>
+                <div className="icon-lock text-lg"></div>
+              </div>
+              
+              {/* Show/Hide Password Button */}
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-300"
+              >
+                <div className={`icon-${showPassword ? 'eye-off' : 'eye'} text-lg`}></div>
+              </button>
+
+              {/* Animated Security Graphic */}
+              <div className="absolute -right-8 top-1/2 transform -translate-y-1/2">
+                <div className="w-8 h-8 relative">
+                  <div className={`absolute inset-0 transition-all duration-500 ${password ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}`}>
+                    <div className="w-full h-full bg-gradient-to-r from-purple-400 to-purple-500 rounded-full animate-pulse"></div>
+                    <div className="absolute inset-2 bg-white rounded-full flex items-center justify-center">
+                      <div className="icon-shield text-xs text-purple-500"></div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+        </>
+      )}
+
+      {useOTP && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          <div className="flex items-center space-x-3 mb-2">
+            <div className="icon-smartphone text-green-600"></div>
+            <span className="font-medium text-green-800">OTP Verification</span>
+          </div>
+          <p className="text-sm text-green-700">
+            Click "Send OTP" to receive a verification code on your {loginMethod === 'email' ? 'email' : 'mobile number'}.
+          </p>
         </div>
-      </div>
+      )}
 
       {/* Submit Button */}
       <button
         type="submit"
-        className="w-full group relative overflow-hidden bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl py-4 px-6 font-semibold transition-all duration-500 hover:from-red-600 hover:to-red-700 hover:shadow-lg transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
-        disabled={!(email || mobile) || !password}
+        className={`w-full group relative overflow-hidden text-white rounded-xl py-4 px-6 font-semibold transition-all duration-500 hover:shadow-lg transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed ${
+          useOTP 
+            ? 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700' 
+            : 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700'
+        }`}
+        disabled={!(email || mobile) || (!useOTP && !password)}
       >
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full animate-ping"></div>
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full opacity-30 animate-pulse"></div>
         </div>
-        <span className="relative z-10">Sign In</span>
+        <span className="relative z-10">
+          {useOTP ? 'Send OTP' : 'Sign In'}
+        </span>
       </button>
 
       {/* Forgot Password Link */}
@@ -173,12 +345,14 @@ function App() {
   const [user, setUser] = React.useState(null);
   const [showLoginForm, setShowLoginForm] = React.useState(false);
   const [loginMethod, setLoginMethod] = React.useState('email');
+  const [showOTPVerification, setShowOTPVerification] = React.useState(false);
+  const [otpContact, setOtpContact] = React.useState('');
 
   React.useEffect(() => {
-    // Show splash screen for 5 seconds with quotes
+    // Show splash screen for 1.5 seconds with motivational quotes
     const timer = setTimeout(() => {
       setCurrentView('auth');
-    }, 5000);
+    }, 1500);
 
     return () => clearTimeout(timer);
   }, []);
@@ -202,6 +376,26 @@ function App() {
       setIsLoading(false);
       window.location.href = 'dashboard.html';
     }, 1500);
+  };
+
+  const handleSendOTP = (method, contact) => {
+    setIsLoading(true);
+    // Simulate sending OTP
+    setTimeout(() => {
+      setOtpContact(contact);
+      setShowOTPVerification(true);
+      setIsLoading(false);
+    }, 1500);
+  };
+
+  const handleVerifyOTP = (otpCode) => {
+    setIsLoading(true);
+    // Simulate OTP verification
+    setTimeout(() => {
+      setUser({ name: 'Student', email: otpContact });
+      setIsLoading(false);
+      window.location.href = 'dashboard.html';
+    }, 1000);
   };
 
   const handleGuestLogin = () => {
@@ -314,20 +508,40 @@ function App() {
                 </>
               ) : (
                 <>
-                  {/* Login Form */}
-                  <div className="space-y-6">
-                    <div className="text-center mb-6">
-                      <h3 className="text-2xl font-bold text-gray-800">
-                        {loginMethod === 'email' ? 'Sign In with Email' : 'Sign In with Mobile'}
-                      </h3>
-                    </div>
+                  {!showOTPVerification ? (
+                    <>
+                      {/* Login Form */}
+                      <div className="space-y-6">
+                        <div className="text-center mb-6">
+                          <h3 className="text-2xl font-bold text-gray-800">
+                            {loginMethod === 'email' ? 'Sign In with Email' : 'Sign In with Mobile'}
+                          </h3>
+                        </div>
 
-                    <LoginForm 
-                      loginMethod={loginMethod}
-                      onLogin={handleEmailLogin}
-                      onBack={() => setShowLoginForm(false)}
-                    />
-                  </div>
+                        <LoginForm 
+                          loginMethod={loginMethod}
+                          onLogin={handleEmailLogin}
+                          onSendOTP={handleSendOTP}
+                          onBack={() => setShowLoginForm(false)}
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      {/* OTP Verification */}
+                      <div className="space-y-6">
+                        <OTPVerification
+                          loginMethod={loginMethod}
+                          contact={otpContact}
+                          onVerify={handleVerifyOTP}
+                          onBack={() => {
+                            setShowOTPVerification(false);
+                            setOtpContact('');
+                          }}
+                        />
+                      </div>
+                    </>
+                  )}
                 </>
               )}
 

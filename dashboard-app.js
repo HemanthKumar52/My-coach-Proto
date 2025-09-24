@@ -4,7 +4,12 @@ function DashboardApp() {
   const renderContent = () => {
     switch (currentPage) {
       case 'home':
-        return <HomePage />;
+        return (
+          <div className="space-y-8">
+            <HomePage />
+            <History />
+          </div>
+        );
       case 'about':
         window.location.href = 'about.html';
         return null;
@@ -27,7 +32,12 @@ function DashboardApp() {
         window.location.href = 'reports.html';
         return null;
       default:
-        return <HomePage />;
+        return (
+          <div className="space-y-8">
+            <HomePage />
+            <History />
+          </div>
+        );
     }
   };
 
