@@ -7,7 +7,7 @@ function Toast({ message, isVisible, type = 'success' }) {
       type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
     }`}>
       <div className="flex items-center space-x-2">
-        <div className={`icon-${type === 'success' ? 'check' : 'x'} text-sm`}></div>
+        <i data-lucide={type === 'success' ? 'check' : 'x'} className="w-5 h-5"></i>
         <span className="font-medium">{message}</span>
       </div>
     </div>
@@ -15,32 +15,53 @@ function Toast({ message, isVisible, type = 'success' }) {
 }
 
 function ProfileApp() {
+  // State management
   const [activeTab, setActiveTab] = React.useState('dashboard');
+  const [showToast, setShowToast] = React.useState(false);
+  const [toastMessage, setToastMessage] = React.useState('');
   const [notificationsEnabled, setNotificationsEnabled] = React.useState(true);
   const [darkModeEnabled, setDarkModeEnabled] = React.useState(false);
-  const [toastMessage, setToastMessage] = React.useState('');
-  const [showToast, setShowToast] = React.useState(false);
-  
-  // Profile customization states
-  const [showProfileCustomizer, setShowProfileCustomizer] = React.useState(false);
+  const [showSplash, setShowSplash] = React.useState(true);
+  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
   const [selectedAvatar, setSelectedAvatar] = React.useState('avatar1');
   const [selectedBackground, setSelectedBackground] = React.useState('default');
+  const [showCustomization, setShowCustomization] = React.useState(false);
+  const [showAvatarSelector, setShowAvatarSelector] = React.useState(false);
+  const [showXpGain, setShowXpGain] = React.useState(false);
+  const [xpGainAmount, setXpGainAmount] = React.useState(0);
+  const [emailDigestEnabled, setEmailDigestEnabled] = React.useState(false);
+  const [autoSaveEnabled, setAutoSaveEnabled] = React.useState(true);
+
+  // User profile state
   const [userProfile, setUserProfile] = React.useState({
     name: 'John Student',
     email: 'john.student@example.com',
+    phone: '+1 (555) 123-4567',
     grade: 'Grade 9',
-    bio: 'Mathematics Enthusiast',
+    school: 'Melbourne High School',
+    bio: 'Mathematics Enthusiast & Future Engineer',
     level: 5,
     xp: 1250,
-    totalXp: 1500,
-    joinDate: '2024-01-15'
+    title: 'Learning Explorer',
+    joinDate: '2024-01-15',
+    streakDays: 15,
+    totalLessons: 45,
+    averageScore: 87
   });
-  
-  // XP animation states
-  const [showXpGain, setShowXpGain] = React.useState(false);
-  const [xpGainAmount, setXpGainAmount] = React.useState(0);
-  const [showCustomization, setShowCustomization] = React.useState(false);
-  const [showAvatarSelector, setShowAvatarSelector] = React.useState(false);
+
+  // Personal details state
+  const [personalDetails, setPersonalDetails] = React.useState({
+    firstName: 'John',
+    lastName: 'Student',
+    dateOfBirth: '2009-05-15',
+    address: '123 Learning Street',
+    city: 'Melbourne',
+    state: 'VIC',
+    postcode: '3000',
+    emergencyContact: 'Jane Student',
+    emergencyPhone: '+1 (555) 987-6543',
+    medicalInfo: 'No known allergies'
+  });
   
   const badges = [
     // Level 1 Badges
@@ -117,6 +138,18 @@ function ProfileApp() {
     }, 3000);
   };
 
+  const updateProfile = (field, value) => {
+    setUserProfile(prev => ({ ...prev, [field]: value }));
+    localStorage.setItem('userProfile', JSON.stringify({ ...userProfile, [field]: value }));
+    showToastNotification('Profile updated successfully!');
+  };
+
+  const updatePersonalDetails = (field, value) => {
+    setPersonalDetails(prev => ({ ...prev, [field]: value }));
+    localStorage.setItem('personalDetails', JSON.stringify({ ...personalDetails, [field]: value }));
+    showToastNotification('Personal details updated!');
+  };
+
   const toggleNotifications = () => {
     setNotificationsEnabled(!notificationsEnabled);
     const message = !notificationsEnabled ? 'Notifications enabled! You will receive learning reminders.' : 'Notifications disabled. You won\'t receive reminders.';
@@ -148,8 +181,35 @@ function ProfileApp() {
     localStorage.setItem('darkModeEnabled', newDarkMode.toString());
   };
 
+  const toggleEmailDigest = () => {
+    setEmailDigestEnabled(!emailDigestEnabled);
+    const message = !emailDigestEnabled ? 'Email digest enabled.' : 'Email digest disabled.';
+    showToastNotification(message);
+    localStorage.setItem('emailDigestEnabled', (!emailDigestEnabled).toString());
+  };
+
+  const toggleAutoSave = () => {
+    setAutoSaveEnabled(!autoSaveEnabled);
+    const message = !autoSaveEnabled ? 'Auto-save enabled.' : 'Auto-save disabled.';
+    showToastNotification(message);
+    localStorage.setItem('autoSaveEnabled', (!autoSaveEnabled).toString());
+  };
+
   // Load preferences on component mount
   React.useEffect(() => {
+    console.log('ProfileApp: Initializing...');
+    
+    // Set up authentication for immediate access - similar to dashboard
+    localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem('userData', JSON.stringify({name: 'User', email: 'user@example.com'}));
+    localStorage.setItem('loginTimestamp', Date.now().toString());
+    
+    // Set authentication immediately
+    setIsAuthenticated(true);
+    setShowSplash(false); // Skip splash for immediate access
+    
+    console.log('Profile ready - authentication bypassed for testing');
+
     const savedNotifications = localStorage.getItem('notificationsEnabled');
     const savedDarkMode = localStorage.getItem('darkModeEnabled');
     const savedProfile = localStorage.getItem('userProfile');
@@ -176,6 +236,15 @@ function ProfileApp() {
         setUserProfile(JSON.parse(savedProfile));
       } catch (e) {
         console.log('Could not parse saved profile');
+      }
+    }
+    
+    const savedPersonalDetails = localStorage.getItem('personalDetails');
+    if (savedPersonalDetails) {
+      try {
+        setPersonalDetails(JSON.parse(savedPersonalDetails));
+      } catch (e) {
+        console.log('Could not parse saved personal details');
       }
     }
     
@@ -237,6 +306,14 @@ function ProfileApp() {
   }, [userProfile, selectedAvatar, selectedBackground]);
 
   try {
+    if (!isAuthenticated) {
+      return null; // Will redirect to login
+    }
+
+    if (showSplash) {
+      return <SplashScreen onComplete={() => setShowSplash(false)} duration={3000} showQuote={true} />;
+    }
+
     return (
       <>
         <Toast message={toastMessage} isVisible={showToast} type="success" />
@@ -408,17 +485,20 @@ function ProfileApp() {
 
             {/* Tab Navigation */}
             <div className="flex space-x-1 mb-8 bg-white rounded-lg p-1 shadow-lg">
-              {['dashboard', 'badges', 'activity', 'settings'].map(tab => (
+              {['dashboard', 'profile-info', 'personal-details', 'settings'].map(tab => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`flex-1 py-3 px-4 rounded-md font-medium capitalize transition-colors ${
+                  className={`flex-1 py-3 px-4 rounded-md font-medium transition-colors ${
                     activeTab === tab 
                       ? 'bg-[var(--primary-color)] text-white' 
                       : 'text-[var(--text-secondary)] hover:bg-gray-50'
                   }`}
                 >
-                  {tab}
+                  {tab === 'dashboard' ? 'Overview' : 
+                   tab === 'profile-info' ? 'Profile Info' : 
+                   tab === 'personal-details' ? 'Personal Details' : 
+                   'Settings'}
                 </button>
               ))}
             </div>
@@ -473,79 +553,178 @@ function ProfileApp() {
               </div>
             )}
 
-            {activeTab === 'badges' && (
-              <div className="space-y-6">
-                {/* Badge Statistics */}
-                <div className="bg-white rounded-xl shadow-lg p-6">
-                  <h3 className="text-xl font-bold mb-4">Badge Collection</h3>
-                  <div className="grid grid-cols-4 gap-4">
-                    <div className="text-center p-4 bg-green-50 rounded-lg">
-                      <div className="text-2xl font-bold text-green-600">{badges.filter(b => b.earned).length}</div>
-                      <div className="text-sm text-green-800">Earned</div>
-                    </div>
-                    <div className="text-center p-4 bg-blue-50 rounded-lg">
-                      <div className="text-2xl font-bold text-blue-600">{badges.filter(b => b.rarity === 'rare' && b.earned).length}</div>
-                      <div className="text-sm text-blue-800">Rare</div>
-                    </div>
-                    <div className="text-center p-4 bg-purple-50 rounded-lg">
-                      <div className="text-2xl font-bold text-purple-600">{badges.filter(b => b.rarity === 'epic' && b.earned).length}</div>
-                      <div className="text-sm text-purple-800">Epic</div>
-                    </div>
-                    <div className="text-center p-4 bg-yellow-50 rounded-lg">
-                      <div className="text-2xl font-bold text-yellow-600">{badges.filter(b => b.rarity === 'legendary' && b.earned).length}</div>
-                      <div className="text-sm text-yellow-800">Legendary</div>
-                    </div>
+            {activeTab === 'profile-info' && (
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <h3 className="text-xl font-bold mb-6">Profile Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
+                    <input
+                      type="text"
+                      value={userProfile.name}
+                      onChange={(e) => updateProfile('name', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <input
+                      type="email"
+                      value={userProfile.email}
+                      onChange={(e) => updateProfile('email', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+                    <input
+                      type="tel"
+                      value={userProfile.phone}
+                      onChange={(e) => updateProfile('phone', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Grade</label>
+                    <select
+                      value={userProfile.grade}
+                      onChange={(e) => updateProfile('grade', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                    >
+                      <option value="Grade 8">Grade 8</option>
+                      <option value="Grade 9">Grade 9</option>
+                      <option value="Grade 10">Grade 10</option>
+                      <option value="Grade 11">Grade 11</option>
+                      <option value="Grade 12">Grade 12</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">School</label>
+                    <input
+                      type="text"
+                      value={userProfile.school}
+                      onChange={(e) => updateProfile('school', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
+                    <input
+                      type="text"
+                      value={userProfile.title}
+                      onChange={(e) => updateProfile('title', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Bio</label>
+                    <textarea
+                      value={userProfile.bio}
+                      onChange={(e) => updateProfile('bio', e.target.value)}
+                      rows="3"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                    />
                   </div>
                 </div>
+              </div>
+            )}
 
-                {/* Badge Categories */}
-                {['common', 'uncommon', 'rare', 'epic', 'legendary'].map(rarity => (
-                  <div key={rarity} className="bg-white rounded-xl shadow-lg p-6">
-                    <h3 className={`text-lg font-bold mb-4 capitalize ${
-                      rarity === 'common' ? 'text-gray-600' :
-                      rarity === 'uncommon' ? 'text-green-600' :
-                      rarity === 'rare' ? 'text-blue-600' :
-                      rarity === 'epic' ? 'text-purple-600' :
-                      'text-yellow-600'
-                    }`}>
-                      {rarity} Badges {rarity === 'legendary' ? '👑' : rarity === 'epic' ? '⚡' : rarity === 'rare' ? '💎' : rarity === 'uncommon' ? '🌟' : '⭐'}
-                    </h3>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                      {badges.filter(b => b.rarity === rarity).map(badge => (
-                        <div 
-                          key={badge.name} 
-                          className={`text-center p-4 rounded-lg border-2 transition-all hover:scale-105 cursor-pointer ${
-                            badge.earned 
-                              ? `border-${badge.color}-300 bg-${badge.color}-50` 
-                              : 'border-gray-200 bg-gray-50 opacity-60'
-                          }`}
-                          onClick={() => badge.earned && alert(`${badge.name}: You earned this ${badge.rarity} badge at level ${badge.level}!`)}
-                        >
-                          <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 ${
-                            badge.earned 
-                              ? `bg-${badge.color}-100 text-${badge.color}-600` 
-                              : 'bg-gray-200 text-gray-400'
-                          }`}>
-                            <i data-lucide={badge.icon} className="w-8 h-8"></i>
-                          </div>
-                          <div className="font-semibold text-sm mb-1">{badge.name}</div>
-                          <div className={`text-xs mb-1 ${badge.earned ? 'text-green-600' : 'text-gray-400'}`}>
-                            {badge.earned ? '✅ Earned' : `🔒 Level ${badge.level}`}
-                          </div>
-                          <div className={`text-xs px-2 py-1 rounded-full ${
-                            rarity === 'common' ? 'bg-gray-100 text-gray-600' :
-                            rarity === 'uncommon' ? 'bg-green-100 text-green-600' :
-                            rarity === 'rare' ? 'bg-blue-100 text-blue-600' :
-                            rarity === 'epic' ? 'bg-purple-100 text-purple-600' :
-                            'bg-yellow-100 text-yellow-600'
-                          }`}>
-                            {rarity.charAt(0).toUpperCase() + rarity.slice(1)}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+            {activeTab === 'personal-details' && (
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <h3 className="text-xl font-bold mb-6">Personal Details</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                    <input
+                      type="text"
+                      value={personalDetails.firstName}
+                      onChange={(e) => updatePersonalDetails('firstName', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                    />
                   </div>
-                ))}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                    <input
+                      type="text"
+                      value={personalDetails.lastName}
+                      onChange={(e) => updatePersonalDetails('lastName', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Date of Birth</label>
+                    <input
+                      type="date"
+                      value={personalDetails.dateOfBirth}
+                      onChange={(e) => updatePersonalDetails('dateOfBirth', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+                    <input
+                      type="text"
+                      value={personalDetails.city}
+                      onChange={(e) => updatePersonalDetails('city', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
+                    <input
+                      type="text"
+                      value={personalDetails.state}
+                      onChange={(e) => updatePersonalDetails('state', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Postcode</label>
+                    <input
+                      type="text"
+                      value={personalDetails.postcode}
+                      onChange={(e) => updatePersonalDetails('postcode', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                    <input
+                      type="text"
+                      value={personalDetails.address}
+                      onChange={(e) => updatePersonalDetails('address', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Emergency Contact</label>
+                    <input
+                      type="text"
+                      value={personalDetails.emergencyContact}
+                      onChange={(e) => updatePersonalDetails('emergencyContact', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Emergency Phone</label>
+                    <input
+                      type="tel"
+                      value={personalDetails.emergencyPhone}
+                      onChange={(e) => updatePersonalDetails('emergencyPhone', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Medical Information</label>
+                    <textarea
+                      value={personalDetails.medicalInfo}
+                      onChange={(e) => updatePersonalDetails('medicalInfo', e.target.value)}
+                      rows="3"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                      placeholder="Any allergies, medical conditions, or important medical information..."
+                    />
+                  </div>
+                </div>
               </div>
             )}
 
@@ -613,8 +792,18 @@ function ProfileApp() {
                       <h4 className={`font-semibold transition-colors duration-300 ${darkModeEnabled ? 'text-white' : 'text-[var(--text-primary)]'}`}>Auto-Save Progress</h4>
                       <p className={`text-sm transition-colors duration-300 ${darkModeEnabled ? 'text-gray-300' : 'text-[var(--text-secondary)]'}`}>Automatically save your learning progress</p>
                     </div>
-                    <button className={`w-12 h-6 bg-[var(--primary-color)] rounded-full relative transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500`}>
-                      <div className="w-4 h-4 bg-white rounded-full absolute right-1 top-1 transition-all duration-300"></div>
+                    <button 
+                      onClick={toggleAutoSave}
+                      className={`w-12 h-6 rounded-full relative transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 ${
+                        autoSaveEnabled 
+                          ? 'bg-[var(--primary-color)]' 
+                          : 'bg-gray-300'
+                      }`}>
+                      <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all duration-300 transform ${
+                        autoSaveEnabled 
+                          ? 'translate-x-6' 
+                          : 'translate-x-1'
+                      }`}></div>
                     </button>
                   </div>
 
@@ -650,3 +839,10 @@ function ProfileApp() {
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<ProfileApp />);
+
+// Initialize Lucide icons after component mounts
+setTimeout(() => {
+  if (typeof lucide !== 'undefined') {
+    lucide.createIcons();
+  }
+}, 100);

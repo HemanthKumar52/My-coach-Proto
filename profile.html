@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile Details - MyCoach</title>
+    <script>var currentPage = 'profile';</script>
     <meta name="description" content="Your learning profile and achievements">
     
     <script src="https://resource.trickle.so/vendor_lib/unpkg/react@18/umd/react.production.min.js"></script>
@@ -63,8 +64,10 @@
 </head>
 <body>
     <div id="root"></div>
-    <script type="text/babel" src="components/Sidebar.js"></script>
+    <script type="text/babel" src="utils/auth.js"></script>
     <script type="text/babel" src="utils/quotes.js"></script>
-    <script type="text/babel" src="profile-unified.js"></script>
+    <script type="text/babel" src="components/SplashScreen.js"></script>
+    <script type="text/babel" src="components/Sidebar.js"></script>
+    <script type="text/babel" src="profile-app.js"></script>
 </body>
 </html>

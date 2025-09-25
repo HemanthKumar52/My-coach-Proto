@@ -205,7 +205,7 @@ function LoginForm({ loginMethod, onLogin, onBack, onSendOTP }) {
       {currentQuote && (
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-500 p-4 rounded-lg">
           <div className="flex items-start space-x-3">
-            <i data-lucide="quote" className="w-5 h-5 text-blue-500 mt-1 flex-shrink-0"></i>
+            <div className="icon-quote w-5 h-5 text-blue-500 mt-1 flex-shrink-0"></div>
             <div>
               <p className="text-sm italic text-gray-700 leading-relaxed">{currentQuote.text}</p>
               {currentQuote.author && (
@@ -377,12 +377,32 @@ function App() {
   const [loginMethod, setLoginMethod] = React.useState('email');
   const [showOTPVerification, setShowOTPVerification] = React.useState(false);
   const [otpContact, setOtpContact] = React.useState('');
+  const [currentQuote, setCurrentQuote] = React.useState('');
 
   React.useEffect(() => {
-    // Show splash screen for 1.5 seconds with motivational quotes
+    // Only run authentication check on login page
+    if (window.AuthUtils && window.AuthUtils.getCurrentPage() !== 'login') {
+      return;
+    }
+
+    // Get a random quote for the splash screen first
+    if (typeof getRandomQuote === 'function') {
+      setCurrentQuote(getRandomQuote());
+    } else {
+      setCurrentQuote("Learning is a journey, not a destination.");
+    }
+
+    // Show splash screen for 3 seconds with motivational quotes as requested
     const timer = setTimeout(() => {
-      setCurrentView('auth');
-    }, 1500);
+      // Check if user is already logged in after splash screen
+      if (window.AuthUtils && window.AuthUtils.isAuthenticated()) {
+        // User is already logged in, redirect to dashboard
+        window.AuthUtils.redirectTo('dashboard');
+      } else {
+        // Show auth screen
+        setCurrentView('auth');
+      }
+    }, 3000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -391,10 +411,15 @@ function App() {
     setIsLoading(true);
     // Simulate authentication
     setTimeout(() => {
-      setUser({ name: 'Student', email: 'student@example.com' });
+      const userData = { name: 'Student', email: 'student@example.com', loginMethod: method };
+      setUser(userData);
+      // Store login data and redirect to test dashboard
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('userData', JSON.stringify(userData));
+      localStorage.setItem('loginTimestamp', Date.now().toString());
       setIsLoading(false);
-      // Redirect to dashboard after successful login
-      window.location.href = 'dashboard.html';
+      // Redirect to main dashboard
+      setTimeout(() => window.location.href = 'dashboard.html', 300);
     }, 1000);
   };
 
@@ -402,9 +427,15 @@ function App() {
     setIsLoading(true);
     // Simulate email/password authentication
     setTimeout(() => {
-      setUser({ name: 'Student', email: email });
+      const userData = { name: 'Student', email: email, loginMethod: 'email' };
+      setUser(userData);
+      // Store login data and redirect to test dashboard
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('userData', JSON.stringify(userData));
+      localStorage.setItem('loginTimestamp', Date.now().toString());
       setIsLoading(false);
-      window.location.href = 'dashboard.html';
+      // Redirect to main dashboard
+      setTimeout(() => window.location.href = 'dashboard.html', 300);
     }, 1500);
   };
 
@@ -422,27 +453,75 @@ function App() {
     setIsLoading(true);
     // Simulate OTP verification
     setTimeout(() => {
-      setUser({ name: 'Student', email: otpContact });
-      setIsLoading(false);
-      window.location.href = 'dashboard.html';
+      const userData = { name: 'Student', email: otpContact, loginMethod: 'otp' };
+      setUser(userData);
+      // Use AuthUtils for consistent login handling
+      if (window.AuthUtils) {
+        window.AuthUtils.completeLogin(userData);
+        setIsLoading(false);
+        window.AuthUtils.redirectTo('dashboard');
+      } else {
+        // Fallback if AuthUtils not loaded
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('userData', JSON.stringify(userData));
+        localStorage.setItem('loginTimestamp', Date.now().toString());
+        setIsLoading(false);
+        setTimeout(() => window.location.href = 'dashboard.html', 300);
+      }
     }, 1000);
   };
 
   const handleGuestLogin = () => {
-    setUser({ name: 'Guest', email: null });
-    window.location.href = 'personal-details.html';
+    const guestData = { name: 'Guest', email: null, loginMethod: 'guest' };
+    setUser(guestData);
+    // Store login data and redirect to test dashboard
+    localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem('userData', JSON.stringify(guestData));
+    localStorage.setItem('loginTimestamp', Date.now().toString());
+    // Redirect to dashboard
+    setTimeout(() => window.location.href = 'dashboard.html', 300);
   };
 
   try {
     if (currentView === 'splash') {
       return (
         <div className="min-h-screen bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center" data-name="splash" data-file="app.js">
-          <div className="text-center text-white">
-            <div className="w-32 h-32 mx-auto mb-6 bg-white rounded-full flex items-center justify-center">
+          <div className="text-center text-white max-w-2xl px-6">
+            <div className="w-32 h-32 mx-auto mb-6 bg-white rounded-full flex items-center justify-center shadow-2xl">
               <div className="icon-graduation-cap text-6xl text-[var(--primary-color)]"></div>
             </div>
-            <h1 className="text-4xl font-bold mb-2">MyCoach</h1>
-            <p className="text-red-100">Your Personal Learning Assistant</p>
+            <h1 className="text-4xl font-bold mb-6">MyCoach</h1>
+            
+            {/* Quote Display in White Text */}
+            <div className="mb-4">
+              {(() => {
+                const parts = currentQuote.split(' - ');
+                const quote = parts[0] || currentQuote;
+                const author = parts[1] || 'Unknown';
+                
+                return (
+                  <div>
+                    <p className="text-white text-lg font-medium leading-relaxed italic mb-2">
+                      "{quote}"
+                    </p>
+                    <p className="text-red-100 text-sm font-normal">
+                      - {author}
+                    </p>
+                  </div>
+                );
+              })()}
+            </div>
+            
+            <p className="text-red-100 text-sm">Your Personal Learning Assistant</p>
+            
+            {/* Loading animation */}
+            <div className="mt-8">
+              <div className="inline-flex items-center space-x-2">
+                <div className="w-2 h-2 bg-white rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+              </div>
+            </div>
           </div>
         </div>
       );

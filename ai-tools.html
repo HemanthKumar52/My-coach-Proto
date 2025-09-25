@@ -3,15 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About MyCoach - MyCoach</title>
-    <meta name="description" content="Learn about MyCoach's mission and vision for educational excellence">
-    
+    <title>AI Tools - My Coach</title>
     <script src="https://resource.trickle.so/vendor_lib/unpkg/react@18/umd/react.production.min.js"></script>
     <script src="https://resource.trickle.so/vendor_lib/unpkg/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://resource.trickle.so/vendor_lib/unpkg/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://resource.trickle.so/vendor_lib/unpkg/lucide-static@0.516.0/font/lucide.css" rel="stylesheet">
-
+    <script src="https://cdn.tailwindcss.com"></script>
     <style type="text/tailwindcss">
     @layer theme {
         :root {
@@ -22,13 +19,40 @@
             --text-secondary: #6b7280;
             --background: #ffffff;
             --surface: #f9fafb;
+            --sidebar-width: 280px;
+            --header-height: 60px;
+        }
+    }
+    
+    @layer base {
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+        }
+    }
+        
+    .content-area {
+        margin-left: var(--sidebar-width);
+        padding-top: var(--header-height);
+        min-height: 100vh;
+    }
+    
+    @media (max-width: 1024px) {
+        .content-area {
+            margin-left: 0;
         }
     }
     </style>
 </head>
-<body>
+<body class="bg-gray-50">
     <div id="root"></div>
+    
+    <script type="text/babel" src="utils/auth.js"></script>
+    <script type="text/babel" src="components/SplashScreen.js"></script>
     <script type="text/babel" src="components/Sidebar.js"></script>
-    <script type="text/babel" src="about-app.js"></script>
+    <script type="text/babel" src="components/AITools.js"></script>
+    <script type="text/babel" src="components/AIToolsPage.js"></script>
+    <script type="text/babel" src="ai-tools-app.js"></script>
 </body>
 </html>

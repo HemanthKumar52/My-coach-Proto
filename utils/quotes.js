@@ -19,9 +19,14 @@ const philosophyQuotes = [
 function getRandomQuote() {
   try {
     const randomIndex = Math.floor(Math.random() * philosophyQuotes.length);
-    return philosophyQuotes[randomIndex];
+    const selectedQuote = philosophyQuotes[randomIndex];
+    return selectedQuote;
   } catch (error) {
     console.error('getRandomQuote error:', error);
-    return "Learning is a journey, not a destination.";
+    return "Learning is a journey, not a destination. - MyCoach";
   }
 }
+
+// Expose globally for both index.html and dashboard.html consumers
+window.getRandomQuote = getRandomQuote;
+window.philosophyQuotes = philosophyQuotes;

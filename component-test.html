@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Component Test - MyCoach</title>
+    <script src="https://resource.trickle.so/vendor_lib/unpkg/react@18/umd/react.production.min.js"></script>
+    <script src="https://resource.trickle.so/vendor_lib/unpkg/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://resource.trickle.so/vendor_lib/unpkg/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://resource.trickle.so/vendor_lib/unpkg/lucide-static@0.516.0/font/lucide.css" rel="stylesheet">
+
+    <style type="text/tailwindcss">
+    @layer theme {
+        :root {
+            --primary-color: #dc2626;
+            --secondary-color: #fef2f2;
+            --accent-color: #7f1d1d;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --background: #ffffff;
+            --surface: #f9fafb;
+        }
+    }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        console.log('Starting component test...');
+        
+        function ComponentTest() {
+            const [loadedComponents, setLoadedComponents] = React.useState({});
+            
+            React.useEffect(() => {
+                console.log('Testing component availability...');
+                const components = {};
+                
+                // Check each component
+                components.AITools = typeof AITools !== 'undefined';
+                components.CoursesAccordion = typeof CoursesAccordion !== 'undefined';
+                components.HomePage = typeof HomePage !== 'undefined';
+                components.History = typeof History !== 'undefined';
+                components.Sidebar = typeof Sidebar !== 'undefined';
+                components.SplashScreen = typeof SplashScreen !== 'undefined';
+                
+                console.log('Component status:', components);
+                setLoadedComponents(components);
+            }, []);
+            
+            return (
+                <div className="min-h-screen bg-gray-100 p-8">
+                    <div className="max-w-4xl mx-auto">
+                        <h1 className="text-3xl font-bold mb-8 text-center">MyCoach Component Status</h1>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {Object.entries(loadedComponents).map(([name, loaded]) => (
+                                <div key={name} className={`p-6 rounded-lg shadow-lg ${loaded ? 'bg-green-100 border-green-500' : 'bg-red-100 border-red-500'} border-2`}>
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="font-semibold text-lg">{name}</h3>
+                                        <div className={`w-4 h-4 rounded-full ${loaded ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                                    </div>
+                                    <p className={`mt-2 ${loaded ? 'text-green-700' : 'text-red-700'}`}>
+                                        {loaded ? '✅ Loaded' : '❌ Not Found'}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                        
+                        <div className="mt-8 p-6 bg-white rounded-lg shadow-lg">
+                            <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
+                            <div className="space-y-4">
+                                <button 
+                                    onClick={() => window.location.href = 'dashboard.html'}
+                                    className="w-full bg-blue-500 text-white py-3 px-6 rounded-lg hover:bg-blue-600 transition-colors"
+                                >
+                                    Go to Dashboard
+                                </button>
+                                <button 
+                                    onClick={() => window.location.href = 'index.html'}
+                                    className="w-full bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-colors"
+                                >
+                                    Go to Login
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Render the component test
+        const container = document.getElementById('root');
+        const root = ReactDOM.createRoot(container);
+        root.render(<ComponentTest />);
+    </script>
+    
+    <!-- Load all components for testing -->
+    <script type="text/babel" src="utils/auth.js"></script>
+    <script type="text/babel" src="utils/quotes.js"></script>
+    <script type="text/babel" src="components/SplashScreen.js"></script>
+    <script type="text/babel" src="components/AITools.js"></script>
+    <script type="text/babel" src="components/CoursesAccordion.js"></script>
+    <script type="text/babel" src="components/Sidebar.js"></script>
+    <script type="text/babel" src="components/HomePage.js"></script>
+    <script type="text/babel" src="components/History.js"></script>
+</body>
+</html>
