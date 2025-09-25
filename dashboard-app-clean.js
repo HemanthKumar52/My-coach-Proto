@@ -229,16 +229,18 @@ function DashboardApp() {
 
         case 'history':
           console.log('Loading History component...');
+          console.log('History component type:', typeof History);
           if (typeof History !== 'undefined') {
             return <History />;
           } else {
+            console.warn('History component is undefined, showing fallback');
             return (
               <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-                <div className="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <div className="icon-clock text-2xl text-blue-600"></div>
+                <div className="w-16 h-16 bg-red-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <div className="text-2xl text-red-600">⚠️</div>
                 </div>
-                <h2 className="text-xl font-semibold mb-2">Learning History</h2>
-                <p className="text-gray-600">Track your progress and achievements</p>
+                <h2 className="text-xl font-semibold mb-2">History Component Not Found</h2>
+                <p className="text-gray-600">The History component could not be loaded. Check console for errors.</p>
               </div>
             );
           }
